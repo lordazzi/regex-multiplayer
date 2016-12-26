@@ -1,0 +1,236 @@
+/**
+ * Constantes
+ */
+@blue: #2D9AFA;
+@red: red;
+@green: #07B513;
+
+/**
+ * Funções
+ */
+.box-shadow(@params) {
+	-webkit-box-shadow: @params;
+	-moz-box-shadow: @params;
+	box-shadow: @params;
+}
+
+.duo-box-shadow(@param1, @param2) {
+	-webkit-box-shadow: @param1, @param2;
+	-moz-box-shadow: @param1, @param2;
+	box-shadow: @param1, @param2;
+}
+
+.tri-box-shadow(@param1, @param2, @param3) {
+	-webkit-box-shadow: @param1, @param2, @param3;
+	-moz-box-shadow: @param1, @param2, @param3;
+	box-shadow: @param1, @param2, @param3;
+}
+
+.border-radius(@params) {
+	-webkit-border-radius: @params;
+	-moz-border-radius: @params;
+	border-radius: @params;
+}
+
+.no-select {
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.justify-content(@params) {
+	-webkit-justify-content:	@params;
+	-moz-justify-content:		@params;
+	-ms-justify-content:		@params;
+	justify-content:			@params;
+}
+
+.align-items(@params) {
+	-webkit-align-items:	@params;
+	-moz-align-items:		@params;
+	-ms-align-items:		@params;
+	align-items:			@params;
+}
+
+.display-flex {
+	display: -webkit-flex;
+	display: -moz-flex;
+	display: -ms-flex;
+	display: flex;
+}
+
+.centerfy {
+	.display-flex;
+	.justify-content(center);
+	.align-items(center);
+
+	text-align: center;
+}
+
+.unpadding {
+	-webkit-box-sizing:	border-box;
+	-moz-box-sizing:	border-box;
+	box-sizing:			border-box;
+}
+
+/**
+ * Reset
+ */
+body {
+	margin: 0;
+	font-family: arial;
+}
+
+/**
+ * Genéricos
+ */
+.right {
+	float: right;
+}
+
+.left {
+	float: left;
+}
+
+.label {
+	font-weight: bolder;
+	&:after {
+		content: ':';
+	}
+}
+
+.col {
+	display: flex;
+	& > * {
+		flex: 1 1 0px;
+	}
+}
+
+/**
+ * Componentes
+ */
+input[type=button], button {
+	border: 0;
+	cursor: pointer;
+	padding: 5px 30px;
+	.border-radius(5px);
+
+	color: #fff;
+    font-size: 17px;
+	font-weight: bolder;
+    text-transform: capitalize;
+	font-family: 'Comic Sans MS';
+	text-shadow: -0.5px 0.5px 3px #333;
+
+	&:focus, &:active {
+		outline: none;
+	}
+
+	&.blue {
+		background-color: @blue;
+		.tri-box-shadow(
+			0 0 0 1px #222,
+			0 1px 0 (@blue + #111) inset,
+			0 -1px 0 rgba(51, 51, 51, 0.5) inset
+		);
+
+		&:active {
+			background-color: @blue - #222;
+			.duo-box-shadow(
+				0 0 0 1px #222,
+				0 1px 0 rgba(51, 51, 51, 0.5) inset
+			);
+		}
+	}
+
+	&.red {
+		background-color: @red;
+		.tri-box-shadow(
+			0 0 0 1px #222,
+			0 1px 0 (@red + #555) inset,
+			0 -1px 0 rgba(51, 51, 51, 0.5) inset
+		);
+
+		&:active {
+			background-color: @red - #333;
+			.duo-box-shadow(
+				0 0 0 1px #222,
+				0 1px 0 rgba(51, 51, 51, 0.5) inset
+			);
+		}
+	}
+}
+
+input[type="text"], input[type="password"], input[type="date"], select {
+	display:			block;
+    height:				34px;
+    width: 100%;
+    padding:			6px 12px;
+    font-size:			14px;
+    line-height:		1.42;
+    color:				#555;
+    background-color:	#fff;
+    background-image:	none;
+    border:				1px solid #ccc;
+    border-radius:		4px;
+
+    -webkit-box-shadow:	inset 0 1px 1px rgba(0,0,0,.075);
+    box-shadow:			inset 0 1px 1px rgba(0,0,0,.075);
+
+    -webkit-transition:	border-color ease-in-out .15s,-webkit-box-shadow ease-in-out .15s;
+    -o-transition:		border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+    transition:			border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+}
+
+.palavra {
+	border: 1px solid;
+	height: 30px;
+	margin: 10px;
+	
+	&.unmatch {
+		box-shadow: 0 0 10px red;
+	}
+
+	&.match {
+		box-shadow: 0 0 10px green;
+	}
+}
+
+.margin10 {
+	margin: 10px;
+}
+
+.pontuacao {
+	border-radius: 50%;
+	border: 2px solid;
+	height: 50px;
+	width: 50px;
+	position: absolute;
+	bottom: -10px;
+	right: -5px;
+	background-color: white;
+	font-size: 27px;
+    font-weight: bold;
+}
+
+@columns-number: 6;
+.grid {
+	width:				100%;
+		
+	> * {
+		position:			relative;
+		text-align:			center;
+		
+		width:				100% / @columns-number;
+		width:				calc(100% / @columns-number);
+		
+		float:				left;
+		box-sizing:			border-box;
+		
+		&:nth-child(@{columns-number}n+1) {
+			float:			left;
+			clear:			both;
+		}
+	}
+}

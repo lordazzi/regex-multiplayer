@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Regex Coliseum</title>
+
+		<link rel="stylesheet" type="text/css" href="res/animate.min.css" />
+		<link rel="stylesheet" type="text/less" href="res/main.less" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+		<script  type="text/javascript" src="http://192.168.75.1:2209/socket.io/socket.io.js"></script>
+		<script  type="text/javascript" src="res/jquery-2.2.0.min.js"></script>
+		<script  type="text/javascript" src="res/less.min.js"></script>
+
+		<script type="text/javascript">
+			var conectados	= {};
+			var Tela		= {
+
+				conn: null,
+
+				initialize: function(conn){
+					var me		= this;
+					me.conn		= conn;
+					
+					me.conn.on('iniciar tela',			me.iniciarTela);
+					me.conn.on('novo participante',		me.adicionarParticipante);
+					me.conn.on('remover participacao',	me.removerParticipante);
+					me.conn.on('escreveu nome',			me.escreverNome);
+					me.conn.on('escreveu regex',		me.escreverRegex);
+					me.conn.on('alteracao de palavras',	me.alterarPalavras);
+					me.conn.on('concluiu regex',		me.concluiuRegex);
+					me.conn.emit('sou tela');
+				},
+
+				iniciarTela: function(participantes){
+					for (var key in participantes)
+						Tela.adicionarParticipante(participantes[key]);
+				},
+
+				adicionarParticipante: function(participante){
+					var token			= participante.token;
+					conectados[token]	= participante;
+					participante.html	= $(
+						'<div data-token="" class="row">' + 
+							'<p data-tag="user-name">&nbsp;</p>' + 
+
+							'<div class="palavras">' + 
+								'<div class="centerfy palavra unmatch"></div>' + 
+								'<div class="centerfy palavra unmatch"></div>' + 
+								'<div class="centerfy palavra match"></div>' + 
+								'<div class="centerfy palavra match"></div>' + 
+							'</div>' + 
+
+							'<div class="col margin10 regex-container">' + 
+								'<input data-tag="regex" type="text" />' + 
+							'</div>' + 
+							'<div data-tag="pontuacao" class="centerfy pontuacao">0</div>' + 
+						'</div>'
+					);
+
+					participante.html.attr('data-token', token);
+					participante.html.appendTo($('body'));
+				},
+
+				escreverNome: function(args){
+					var token	= args.token;
+					var dom		= conectados[token].html.find('p[data-tag="user-name"]');
+
+					dom.text(args.nome || "&nbsp;");
+				},
+
+				escreverRegex: function(args){
+					var token	= args.token;
+					var dom		= conectados[token].html.find('input[data-tag="regex"]');
+
+					dom.val(args.regex);
+				},
+
+				alterarPalavras: function(args){
+					var token		= args.token;
+					var dom			= conectados[token].html;
+					var $unmatch	= $(".unmatch",	dom);
+					var $match		= $(".match",	dom);
+					var palavras	= args.palavras;
+
+					for (var i = 0; i < palavras.unmatch.length; i++) {
+						var palavra		= palavras.unmatch[i];
+						var unmatch		= $unmatch[i];
+
+						$(unmatch).text(palavra);
+					}
+
+					for (var i = 0; i < palavras.match.length; i++) {
+						var palavra		= palavras.match[i];
+						var match		= $match[i];
+
+						$(match).text(palavra);
+					}
+				},
+
+				removerParticipante: function(token){
+					conectados[token].html.remove();
+					conectados[token] = null;
+
+					delete conectados[token];
+				},
+
+				concluiuRegex: function(results){
+					debugger;
+					var token	= results.token;
+					var root	= conectados[token].html;
+					var $pontos	= $('.pontuacao', root);
+					$pontos.text(results.pontos);
+
+					if (results.acertou) {
+						root.addClass('animated shake');
+
+						setTimeout(function(){
+							root.removeClass('animated shake');
+						}, 1500);
+					} else {
+						var $match		= $(".match",	root);
+						var $unmatch	= $(".unmatch",	root);
+						var wrong		= result.wrong;
+
+						for (var i = 0; i < wrong.unmatch.length; i++) {
+							!function(){
+								var indice		= wrong.unmatch[i];
+								var unmatched	= $($unmatch[i]);
+
+								unmatched.addClass('animated shake');
+								setTimeout(function(){
+									unmatched.removeClass('animated shake');
+								}, 1500);
+							}();
+						}
+
+						for (var i = 0; i < wrong.match.length; i++) {
+							!function(){
+								var indice		= wrong.match[i];
+								var matched		= $($match[i]);
+
+								matched.addClass('animated shake');
+								setTimeout(function(){
+									matched.removeClass('animated shake');
+								}, 0);
+							}();
+						}
+					}
+				}
+			};
+
+			$(function(){
+				$.ajax({
+					url: 'config.json',
+					success: function(configs){
+						var runat = 'http://'+configs.ip+':'+configs.port;
+						Tela.initialize(io.connect(runat));
+					}
+				});
+			});
+		</script>
+	</head>
+	<body class="grid">
+	</body>
+</html>

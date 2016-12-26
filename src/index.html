@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Controle</title>
+
+		<link rel="stylesheet" type="text/css" href="res/animate.min.css" />
+		<link rel="stylesheet" type="text/less" href="res/main.less" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+		<script  type="text/javascript" src="http://192.168.75.1:2209/socket.io/socket.io.js"></script>
+		<script  type="text/javascript" src="res/jquery-2.2.0.min.js"></script>
+		<script  type="text/javascript" src="res/less.min.js"></script>
+		
+		<script type="text/javascript">
+			var Controle = {
+				conn: null,
+
+				palavras: {},
+
+				initialize: function(conn){
+					var me		= this;
+					me.conn		= conn;
+
+					me.conn.on('pegando palavras',	me.pegarPalavras);
+					me.conn.on('concluiu regex',	me.concluiuRegex);
+					me.conn.emit('sou controle');
+
+					me.solicitarNovasPalavras();
+				},
+
+				pegarPalavras: function(palavras){
+					var $unmatch		= $(".unmatch");
+					var $match			= $(".match");
+					this.palavras		= palavras;
+
+					for (var i = 0; i < palavras.unmatch.length; i++) {
+						var palavra	= palavras.unmatch[i];
+						var dom		= $unmatch[i];
+
+						$(dom).text(palavra);
+					}
+
+					for (var i = 0; i < palavras.match.length; i++) {
+						var palavra	= palavras.match[i];
+						var dom		= $match[i];
+
+						$(dom).text(palavra);
+					}
+				},
+
+				solicitarNovasPalavras: function(){
+					this.conn.emit('pedindo por palavras');
+				},
+
+				confirmarExpressaoRegular: function(){
+					this.conn.emit('usar esta regex');
+				},
+
+				escrevendoNome: function(text){
+					this.conn.emit('escrever nome', text);
+				},
+
+				escrevendoExpressaoRegular: function(text){
+					this.conn.emit('escrever regex', text);
+				},
+
+				concluiuRegex: function(){
+					$text = $("#regex-input");
+					$text.val('');
+					$text.focus();
+
+					Controle.solicitarNovasPalavras();
+				}
+			};
+
+			function Main(runat){
+				var $document = $(document);
+				Controle.initialize(window.io.connect(runat));
+
+				$document.on('click', '[data-action="enviar"]', function(){
+					Controle.confirmarExpressaoRegular();
+				});
+
+				$document.on('input', '#name-input', function(){
+					Controle.escrevendoNome($(this).val());
+				});
+
+				$document.on('input', '#regex-input', function(){
+					Controle.escrevendoExpressaoRegular($(this).val());
+				});
+			}
+
+			$(function(){
+				$.ajax({
+					url: 'config.json',
+					success: function(configs){
+						var runat = 'http://'+configs.ip+':'+configs.port;
+						Main(runat);
+					}
+				});
+			});
+		</script>
+	</head>
+	<body>
+		<div class="row" id="control">
+			<div class="col margin10">
+				<input maxlength="16" id="name-input" type="text" placeholder="Seu nome aqui" />
+			</div>
+
+			<div class="palavras">
+				<div class="centerfy palavra unmatch"></div>
+				<div class="centerfy palavra unmatch"></div>
+				<div class="centerfy palavra match"></div>
+				<div class="centerfy palavra match"></div>
+			</div>
+
+			<div class="col margin10 regex-container">
+				<input id="regex-input" type="text" />
+			</div>
+
+			<div class="margin10 row">
+				<button type="button" data-action="enviar" class="blue">Enviar!</button>
+			</div>
+		</div>
+	</body>
+</html>

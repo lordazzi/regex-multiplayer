@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Ferramenta simples de busca</title>
+
+		<style type="text/css">
+			body {
+				font-family:		arial;
+				margin:				0;
+			}
+
+			#select {
+				margin:				15px auto;
+				width:				300px;
+				text-align:			center;
+				padding:			0px 20px;
+				background-color:	#FFF5AD;
+				color:				black;
+				border:				1px solid;
+			}
+
+			#select > p > strong {
+				font-weight:	bold;
+			}
+
+			#regex {
+				width:			250px;
+				padding:		5px;
+				border:			1px solid;
+				display:		inline-block;
+			}
+
+			#where {
+				width:			960px;
+				margin:			30px auto 0;
+				text-align:		justify;
+			}
+
+			.text-left {
+				text-align: left;
+			}
+
+			.highlight {
+				background-color: yellow;
+			}
+		</style>
+
+		<script type="text/javascript">
+			var texto = function(){/*
+				Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pharetra risus non volutpat eleifend. Pellentesque massa velit, congue eget sapien sit amet, faucibus aliquet orci. Ut ac aliquam lorem, eget tempus quam. Integer rhoncus, purus vitae interdum dictum, ante dolor malesuada augue, ac convallis nisl sapien ut lectus. In fermentum erat venenatis, molestie purus eu, consequat tortor. Mauris eget purus venenatis erat eleifend auctor ut in neque. Vestibulum pulvinar lacus ac eleifend ultrices. Nullam lobortis laoreet metus quis pharetra. Praesent vitae ultricies tellus, id congue enim. Aliquam erat volutpat. Aenean est nibh, molestie eu risus sit amet, aliquet blandit elit. Nulla auctor, eros bibendum dignissim pellentesque, sem ligula malesuada lectus, a porttitor tellus urna in massa. Integer nisl nulla, dapibus sit amet lacinia non, auctor elementum sem. Ut vitae elit rhoncus, rutrum erat non, malesuada ante. Etiam pellentesque egestas sem, ut faucibus nisl mattis in. Suspendisse condimentum vehicula lorem, vel sodales odio finibus non.
+
+				Morbi aliquet lacus nec malesuada facilisis. Aenean pharetra suscipit risus a eleifend. Aliquam ac ullamcorper nisi, at fringilla nisl. Proin id nulla vel ligula efficitur euismod. Etiam mattis nisl sed justo malesuada, ac imperdiet magna eleifend. Duis eget sem a mi venenatis semper. Donec dignissim enim molestie metus molestie, ut finibus libero pellentesque.
+
+				Phasellus nec elit ullamcorper, posuere mi ac, efficitur dui. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Pellentesque et enim velit. Aliquam sit amet lorem at mauris mollis dignissim quis nec mauris. Cras vel ipsum mi. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Integer at aliquet lacus. Sed sed lacinia arcu, non rhoncus ligula. Curabitur volutpat justo dolor, a tincidunt turpis sollicitudin id. In hac habitasse platea dictumst.
+
+				Pellentesque sit amet ante tortor. Sed id felis sed risus mattis placerat sed id neque. Mauris consectetur tempor sem. Donec maximus metus at finibus ullamcorper. Ut vulputate, sem vitae condimentum vestibulum, orci ex varius tellus, et aliquet diam dolor sit amet nibh. Pellentesque elementum est eget mauris venenatis, ac tempor leo congue. Pellentesque semper risus leo, a cursus nisl efficitur non. Fusce nec eros sit amet lectus finibus rutrum. Maecenas sed dui arcu. Curabitur eu ipsum ante. Suspendisse non est rutrum, iaculis ipsum vel, ornare quam. Sed semper eros ligula, ut dignissim sem vehicula quis. Pellentesque est libero, cursus aliquam posuere sed, pellentesque vel quam. Aliquam congue dignissim nisl id tristique. Aliquam consectetur orci quam, vel mollis magna venenatis eu.
+
+				Nulla maximus nisi et nunc sagittis posuere. Ut bibendum leo velit, id lobortis nisl congue at. Integer ultricies velit eros, eu scelerisque sapien sodales eget. Aliquam eget dignissim nisi. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nulla nec ullamcorper justo, ut placerat velit. Morbi scelerisque hendrerit suscipit. Mauris condimentum cursus feugiat. Donec eget leo interdum, rhoncus sem sed, porta sem.
+			*/};
+
+			var byid = function(id) {
+				return document.getElementById(id);
+			};
+
+			var query = function(query){
+				return document.querySelectorAll(query);
+			};
+
+			var renderText = function(regex){
+				var pesquisa	= String(texto);
+				pesquisa		= pesquisa.split('\n');
+				pesquisa.pop();
+				pesquisa.shift();
+				pesquisa		= pesquisa.join('\n');
+				
+				pesquisa		= pesquisa.replace(regex, function(x){
+					if (x)
+						return "<span class='highlight'>" + x + "</span>";
+
+					else
+						return '';
+				});
+
+				console.info(pesquisa);
+
+				var where		= byid('where');
+				where.innerHTML = pesquisa.replace(/\n/g, '\n<br />\n');
+			};
+
+			var getArguments = function(){
+				var g	= byid('g');
+				var i	= byid('i');
+				var args = '';
+
+				if (g.checked)
+					args += 'g';
+
+				if (i.checked)
+					args += 'i';
+
+				return args;
+			};
+
+			var renderArguments = function(){
+				byid('regex_arguments').innerText = '/'+getArguments();
+			};
+
+			window.onload = function(){
+				renderArguments();
+				renderText(/^$/);
+				var searcher = byid("regex");
+
+				onRegChange = function(e){
+					var regitself;
+					try {
+						regitself = new RegExp(searcher.value, getArguments());
+						renderText(regitself);
+					} catch (e) {
+						return;
+					}
+				};
+
+				var checks = query('[type="checkbox"]');
+				for (var i = 0; i < checks.length; i++) {
+					var check = checks[i];
+					!function(check){
+						check.addEventListener('change', function(){
+							renderArguments();
+							onRegChange();
+						});
+					}(check);
+				}
+
+				searcher.addEventListener('input', onRegChange);
+
+			};
+		</script>
+	</head>
+	<body>
+		<div id="select">
+			<p>
+				<strong>SELECT</strong> * <strong>FROM</strong> texto_gigante <strong>WHERE</strong>
+			</p>
+			<p>
+				/ <input id="regex" type="text" /> <span id="regex_arguments">/</span>
+			</p>
+			<p class="text-left">
+				<input type="checkbox" name="g" id="g" checked /> general
+			</p>
+			<p class="text-left">
+				<input type="checkbox" name="i" id="i" checked /> case insensitive
+			</p>
+		</div>
+
+		<div id="where">
+
+		</div>
+	</body>
+</html>
